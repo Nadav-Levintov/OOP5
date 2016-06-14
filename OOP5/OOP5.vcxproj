@@ -18,6 +18,9 @@
       <Platform>x64</Platform>
     </ProjectConfiguration>
   </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="hw5.h" />
+  </ItemGroup>
   <PropertyGroup Label="Globals">
     <ProjectGuid>{90E55770-7986-4F2A-95C3-C1CFE5AAF09B}</ProjectGuid>
     <RootNamespace>OOP5</RootNamespace>
@@ -109,8 +112,6 @@
       <OptimizeReferences>true</OptimizeReferences>
     </Link>
   </ItemDefinitionGroup>
-  <ItemGroup>
-  </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
   </ImportGroup>
