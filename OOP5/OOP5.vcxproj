@@ -22,7 +22,7 @@
     <ClInclude Include="hw5.h" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="test1.cpp" />
+    <ClCompile Include="test_static.cpp" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <ProjectGuid>{90E55770-7986-4F2A-95C3-C1CFE5AAF09B}</ProjectGuid>
