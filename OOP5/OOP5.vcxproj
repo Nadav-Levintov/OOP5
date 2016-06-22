@@ -22,7 +22,12 @@
     <ClInclude Include="hw5.h" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="test_static.cpp" />
+    <ClCompile Include="test_dynamic.cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">false</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="test_static.cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
+    </ClCompile>
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <ProjectGuid>{90E55770-7986-4F2A-95C3-C1CFE5AAF09B}</ProjectGuid>
