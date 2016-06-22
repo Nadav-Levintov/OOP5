@@ -281,7 +281,7 @@ static Dst CASTS::new_dynamic_cast(Src src)
 	
 	if ((CASTS::Inherits_From(&staDst, &staSrc) == 1))
 	{
-		if ((CASTS::Inherits_From(&dyn, &staDst) > 0))
+		if ((CASTS::Inherits_From(&dyn, &staDst) > 0) || dyn==staDst)
 		{
 			return (Dst)src;
 		}
