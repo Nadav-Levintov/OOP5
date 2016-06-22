@@ -4,14 +4,15 @@
 #include <type_traits>
 #include <iostream>
 #include <map>
+#include <set>
 
 using namespace std;
 
 static int typeCounter = 0;
 
 struct typeID {
-	 int value = -1;
-	 int get_value()
+	int value = -1;
+	int get_value()
 	{
 		return value;
 	}
@@ -25,7 +26,7 @@ struct typeID {
 };
 
 
-struct Type 
+struct Type
 {
 	int id;
 	Type() {
@@ -98,7 +99,7 @@ class OOP_Polymorphic
 
 private:
 	void Register_Inheritence(const Type *base);
-
+	static set<Type> handeldParents;
 public:
 	OOP_Polymorphic() {
 		id.set_value();
@@ -106,7 +107,7 @@ public:
 		staticT.setID(id.get_value());
 		t.setID(id.get_value());
 	}
-	
+
 	static const Type *Get_Type()
 	{
 		if (id.get_value() == -1)
@@ -116,10 +117,12 @@ public:
 	}
 	virtual const Type *My_Type()
 	{
-		
+
 		return &t;
 	}
 };
+template<typename T>
+set<Type> OOP_Polymorphic<T>::handeldParents;
 
 template <class T>
 typeID OOP_Polymorphic<T>::id;
@@ -129,10 +132,14 @@ Type OOP_Polymorphic<T>::staticT;
 template<typename T>
 void OOP_Polymorphic<T>::Register_Inheritence(const Type *base)
 {
+
+
+	Type currentT = *(this->My_Type());
+	map<Type, map<Type, int>>::iterator it = CASTS::typesMap.find(currentT);
 	if (base == NULL)
 	{
-		Type currentT = *(this->My_Type());
-		map<Type, map<Type, int>>::iterator it = CASTS::typesMap.find(currentT);
+
+
 		if (it == CASTS::typesMap.end())
 		{
 			map<Type, int> parentsMap;
@@ -144,7 +151,14 @@ void OOP_Polymorphic<T>::Register_Inheritence(const Type *base)
 		return;
 	}
 
+	if (handeldParents.find(*base) != handeldParents.end())
+	{
+		return;
+	}
+	handeldParents.insert(*base);
+	
 	CASTS::addToMap(*(this->My_Type()), *base);
+
 
 }
 
@@ -155,7 +169,7 @@ class CASTS
 {
 
 public:
-	
+
 	static map<Type, map<Type, int>> typesMap;
 
 	template<typename Dst, typename Src>
@@ -171,18 +185,18 @@ public:
 		{
 			return 0;
 		}
-		
+
 		map<Type, int>::iterator it2 = (*it1).second.find(*base);
 		if (it2 == (*it1).second.end())
 		{
-		return 0;
+			return 0;
 		}
 
 		return (*it2).second;
 	}
 
 
-	static void addToMap(const Type &d,const  Type &b)
+	static void addToMap(const Type &d, const  Type &b)
 	{
 		//map<Type, int>::iterator it;
 		if (CASTS::typesMap.find(d) == CASTS::typesMap.end())
@@ -204,6 +218,7 @@ public:
 		{
 			pair<Type, int> oldPair = *myMap.find(b);
 			oldPair.second++;
+			myMap.erase(b);
 			myMap.insert(oldPair);
 		}
 		map<Type, int> &parentMap = (*(CASTS::typesMap.find(b))).second;
@@ -217,13 +232,16 @@ public:
 			{
 				pair<Type, int> oldPair = *myMap.find(p.first);
 				oldPair.second += p.second;
+				myMap.erase(oldPair.first);
 				myMap.insert(oldPair);
 			}
 		}
-
+		pair<Type, map<Type, int>> updatePair(d, myMap);
+		CASTS::typesMap.erase(d);
+		CASTS::typesMap.insert(updatePair);
 		return;
 	}
-	
+
 };
 
 map<Type, map<Type, int>> CASTS::typesMap;
@@ -235,23 +253,32 @@ static Dst CASTS::new_dynamic_cast(Src src)
 		(is_refCASTS<Dst>::value && is_refCASTS<Src>::value)));
 
 	static_assert(b, "illegal dynamic convert");
-	if (std::is_convertible<Dst, Src>::value)
+	
+	if (std::is_convertible<Src, Dst>::value)
 	{
 		return new_static_cast<Dst, Src>(src);
 	}
-	
-	constexpr static bool b2 = (std::is_convertible<extractType<Src>::RET, OOP_Polymorphic<extractType<Src>::RET>>::value) && (std::is_convertible<extractType<Dst>::RET, OOP_Polymorphic<extractType<Dst>::RET>>::value);	
+
+	constexpr static bool b2 = (std::is_convertible<extractType<Src>::RET, OOP_Polymorphic<extractType<Src>::RET>>::value) && (std::is_convertible<extractType<Dst>::RET, OOP_Polymorphic<extractType<Dst>::RET>>::value);
 	static_assert(b2, "illegal dynamic convert");
 
 	Type dyn = createType<Src>::create(src);
 	Type staSrc = *(OOP_Polymorphic<extractType<Src>::RET>::Get_Type());
-	
-	
-	if (!(dyn == staSrc) && (CASTS::Inherits_From(&dyn,&staSrc)==0))
+
+
+	if (!(dyn == staSrc) && (CASTS::Inherits_From(&dyn, &staSrc) == 0))
 	{
-		return errorReturn<Dst>(is_pointerCASTS<Src>::value);
+		
+		return errorDynamic<Dst, is_pointerCASTS<Src>::value>::errorReturn();
 	}
+	
+	if ((OOP_Polymorphic<extractType<Dst>::RET>::Get_Type()) == 0)
+	{
+		return errorDynamic<Dst, is_pointerCASTS<Src>::value>::errorReturn();
+	}
+
 	Type staDst = *(OOP_Polymorphic<extractType<Dst>::RET>::Get_Type());
+	
 	if ((CASTS::Inherits_From(&staDst, &staSrc) == 1))
 	{
 		if ((CASTS::Inherits_From(&dyn, &staDst) > 0))
@@ -259,26 +286,36 @@ static Dst CASTS::new_dynamic_cast(Src src)
 			return (Dst)src;
 		}
 		else
-			return errorReturn<Dst>(is_pointerCASTS<Src>::value);
+			return errorDynamic<Dst, is_pointerCASTS<Src>::value>::errorReturn();
 	}
 
-	return errorReturn<Dst>(is_pointerCASTS<Src>::value);
-	
+	return errorDynamic<Dst, is_pointerCASTS<Src>::value>::errorReturn();
+
 
 }
-template<typename T>
-T errorReturn(bool b)
-{
-	if (b)
+template<typename T,bool b>
+struct errorDynamic {
+	static T errorReturn()
 	{
 		return nullptr;
 	}
 
-	else
+};
+
+template<typename T>
+struct errorDynamic<T,false> {
+	static T errorReturn()
 	{
-		throw new std::bad_cast();
+		throw std::bad_cast();
+
+		return extractType<T>::RET();
 	}
-}
+
+};
+
+
+
+
 
 
 
@@ -339,7 +376,7 @@ struct extractType <T*> {
 
 
 template<typename T>
-struct createType{
+struct createType {
 	static const Type create(T src) {
 		return *(src.My_Type());
 	}
@@ -348,7 +385,7 @@ struct createType{
 
 template<typename T>
 struct createType< T* > {
-	static const Type create(T *src)  {
+	static const Type create(T *src) {
 		return *(src->My_Type());
 	}
 };
@@ -365,7 +402,8 @@ struct IF<true, Dst, Src> {
 public:
 	static Dst castAux(Src src)
 	{
-		return reinterpret_cast<Dst> (src);
+		//return reinterpret_cast<Dst> (src);
+		return (Dst)src;
 	}
 };
 

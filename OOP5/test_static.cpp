@@ -171,11 +171,11 @@ void test_mix_should_not_compile() {
    B1** b11;
     A1** A20 = CASTS::new_static_cast<A1**>(b11);*/
 }
-/*
+
 int main()
 {
 	return 0;
 }
-*/
+
 
 
