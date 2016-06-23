@@ -94,7 +94,7 @@ class OOP_Polymorphic
 	static Type staticT;
 
 	//int vId;
-	//Type* t;
+	Type t;
 
 	friend T; //only the actual type can register this class at the CASTS data structure.
 
@@ -107,7 +107,8 @@ public:
 	OOP_Polymorphic() {
 		id.set_value();
 		staticT.setID(id.get_value());
-		//t = &staticT;
+		const Type temp = *My_Type();
+		t = Type(temp);
 	}
 
 
@@ -121,7 +122,7 @@ public:
 
 	virtual const Type *My_Type()
 	{
-		return &staticT;
+		return &OOP_Polymorphic<T>::staticT;
 	}
 };
 
