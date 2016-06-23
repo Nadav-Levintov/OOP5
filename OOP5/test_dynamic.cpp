@@ -1,12 +1,9 @@
 #include "hw5.h"
-
-
-
-
 class Base : public OOP_Polymorphic<Base> {
 public:  Base() {
-	Register_Inheritence(NULL); // we don't register                                         
-								// "OOPPolymorphic" as a parent  
+
+	Register_Inheritence(NULL); // we don't register
+								// "OOPPolymorphic" as a parent
 }
 };
 class Derived : public Base, public OOP_Polymorphic<Derived> {
@@ -19,7 +16,8 @@ public:
 	}
 };
 int main() {
-	Base* b = new Derived();
+	Derived* d1 = new Derived();
+	Base* b = d1;
 	Derived* d = CASTS::new_dynamic_cast<Derived*>(b);
 	d->f(); //prints 'Derived Successfuly'  
 	return 0;

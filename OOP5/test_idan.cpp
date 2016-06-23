@@ -8,29 +8,19 @@ class A {};
 class B : public A {};
 
 class Base : public OOP_Polymorphic<Base> {
-public:
-  Base() {
-      Register_Inheritence(NULL); // we don't register
-                                  // "OOPPolymorphic" as a parent
-  }
-  const Type *My_Type() const {
-      return OOP_Polymorphic<Base>::Get_Type();
-  }
+public:  Base() {
+	Register_Inheritence(NULL); // we don't register                                         
+								// "OOPPolymorphic" as a parent  
+}
 };
 class Derived : public Base, public OOP_Polymorphic<Derived> {
 public:
-  Derived() {
-      OOP_Polymorphic<Derived>::Register_Inheritence(Base::Get_Type());
-  }
-  const Type *My_Type() const {
-      return OOP_Polymorphic<Derived>::Get_Type();
-  }
-  const Type *My_Type() {
-      return OOP_Polymorphic<Derived>::Get_Type();
-  }
-  virtual void f() {
-      cout << "Derived Successfully" << endl;
-  }
+	Derived() {
+		OOP_Polymorphic<Derived>::Register_Inheritence(Base::Get_Type());
+	}
+	virtual void f() {
+		cout << "Derived Successfully" << endl;
+	}
 };
 
 void static_test() {
@@ -54,7 +44,7 @@ void static_test() {
   CASTS::new_static_cast<A&, B&>(br);
 
   CASTS::new_static_cast<const B*, A*>(ap);
-   CASTS::new_static_cast<const A*, B*>(bp);
+  CASTS::new_static_cast<const A*, B*>(bp);
    CASTS::new_static_cast<const A, B>(b);
    CASTS::new_static_cast<const B&, A&>(ar);
    CASTS::new_static_cast<const A&, B&>(br);
@@ -69,8 +59,8 @@ void static_test() {
   //CASTS::new_static_cast<A, const B>(bc); // idan thought it doesnt work but it does
   
   // EACH LINE HERE SHOULD RAISE "illegal static convert" AND NOT COMPILE!
-//  CASTS::new_static_cast<B*,  const A*>(apc);
-  //CASTS::new_static_cast<A*, const B*>(bpc);
+  //CASTS::new_static_cast<B*,  const A*>(apc);
+ // CASTS::new_static_cast<A*, const B*>(bpc);
 
  // CASTS::new_static_cast<B&, const A&>(arc);
   //CASTS::new_static_cast<A&, const B&>(brc);
@@ -94,7 +84,7 @@ void dynamic_test() {
   CASTS::new_dynamic_cast<Derived*, Base*>(ap);
   CASTS::new_dynamic_cast<Base*, Derived*>(bp);
   CASTS::new_dynamic_cast<Derived&, Base&>(ar);
-  CASTS::new_dynamic_cast<Base&, Derived&>(br);
+  //CASTS::new_dynamic_cast<Base&, Derived&>(br);
 
   //CASTS::new_dynamic_cast<const Derived*, Base*>(ap);
   //CASTS::new_dynamic_cast<const Base*, Derived*>(bp);
