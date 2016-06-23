@@ -408,19 +408,19 @@ Type OOP_Polymorphic<T>::staticT;
 
 /*dynamic or static cast*/
 
-template<typename Dst, typename Src, bool b, bool point>
-struct invokeCast<Dst&, Src&,b,point> {
+template<typename Dst, typename Src, bool point>
+struct invokeCast<Dst&, Src&,false,point> {
 	static Dst& invoke(Src& src)
 	{
 		Src temp = src;
-		Dst &temp2 = *(invokeCast<Dst*, Src*, b,point>::invoke(&temp));
+		Dst &temp2 = *(invokeCast<Dst*, Src*,point>::invoke(&temp));
 		return &temp2;
 	}
 };
 
 
-template<typename Dst, typename Src,bool b, bool point>
-struct invokeCast<Dst*, Src*, b,point> {
+template<typename Dst, typename Src, bool point>
+struct invokeCast<Dst*, Src*, false,point> {
 	static Dst* invoke(Src* src)
 	{
 		/*check both Types inherent from OOP_Polymorphic.*/
