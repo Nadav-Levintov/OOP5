@@ -9,6 +9,8 @@
 using namespace std;
 /*static counter for Type uniqe ID*/
 static int typeCounter = 0;
+
+
 /*Type would have a static typeID member*/
 struct typeID {
 	int value = -1;
@@ -34,10 +36,10 @@ struct Type
 	Type() {
 		id = -1;
 	}
-	
+
 
 	Type(int i) :id(i) {}
-	
+
 
 
 	Type(const Type& t) {
@@ -48,22 +50,22 @@ struct Type
 	{
 		id = i;
 	}
-	
+
 	bool operator==(const Type& t)
 	{
 		return (id == t.id);
 	}
-	
+
 	bool operator<(const Type& t)
 	{
 		return (id < t.id);
 	}
-	
+
 	bool operator>(const Type& t)
 	{
 		return (id > t.id);
 	}
-	
+
 	Type& operator=(const Type& t)
 	{
 		id = t.id;
@@ -86,6 +88,116 @@ bool operator==(const Type& t1, const Type& t2)
 {
 	return (t1.id == t2.id);
 }
+
+
+
+class CASTS
+{
+
+public:
+
+	static map<Type, map<Type, int>> typesMap;//the static DS to control the number of times objects inheret from each other.
+
+	template<typename Dst, typename Src>
+	static Dst new_static_cast(Src src);
+
+	template<typename Dst, typename Src>
+	static Dst new_dynamic_cast(Src src);
+
+	static int Inherits_From(const Type *derived, const Type *base)
+	{
+		map<Type, map<Type, int>>::iterator it1 = CASTS::typesMap.find(*derived);
+		if (it1 == CASTS::typesMap.end())
+		{
+			/*derived was never initiated or was never registerd.*/
+			return 0;
+		}
+
+		map<Type, int>::iterator it2 = (*it1).second.find(*base);
+		if (it2 == (*it1).second.end())
+		{
+			/*base was never initiated or was never registerd.*/
+			return 0;
+		}
+
+		return (*it2).second; //the number of times base inheretes from derived using the CASTS DS
+	}
+
+
+	static void addToMap(const Type &d, const  Type &b)
+	{
+
+		if (CASTS::typesMap.find(d) == CASTS::typesMap.end())
+		{
+			/*if derived is not in the CASTS DB insert it.*/
+			map<Type, int> newMap;
+			pair<Type, map<Type, int>> newPair2(d, newMap);
+			CASTS::typesMap.insert(newPair2);
+		}
+
+
+		map<Type, map<Type, int>>::iterator it = CASTS::typesMap.find(d); //get the map relevent to the derived from the DS in CASTS(it's there for sure).
+		map<Type, int> myMap = (*it).second;//get the map from the pair.
+		if (myMap.find(b) == myMap.end())
+		{
+			/*base is not in my map, insert it with 1 value*/
+			pair<Type, int> newPair(b, 1);
+			myMap.insert(newPair);
+		}
+		else
+		{
+			/*base IS in my map allready, increase the times I inhereted from it.*/
+			pair<Type, int> oldPair = *myMap.find(b);
+			oldPair.second++;
+			myMap.erase(b);
+			myMap.insert(oldPair);
+		}
+		map<Type, int> &parentMap = (*(CASTS::typesMap.find(b))).second;//get the map of base in order to retrive it's inharetence.
+		map<Type, int>::iterator parentIterator = parentMap.begin();
+		while (parentIterator != parentMap.end())
+		{
+			/*for each type in the parent map add it if didn't exsist in my map or update the relevant entry.*/
+			pair<Type, int> p = *(parentIterator);
+			if (myMap.find(p.first) == myMap.end())
+			{
+				myMap.insert(p);
+			}
+			else
+			{
+				pair<Type, int> oldPair = *myMap.find(p.first);
+				oldPair.second += p.second;
+				myMap.erase(oldPair.first);
+				myMap.insert(oldPair);
+			}
+			parentIterator++;
+		}
+
+		//for each (pair<Type, int> p in parentMap)
+		//{
+		//	
+		//	if (myMap.find(p.first) == myMap.end())
+		//	{
+		//		myMap.insert(p);
+		//	}
+		//	else
+		//	{
+		//		pair<Type, int> oldPair = *myMap.find(p.first);
+		//		oldPair.second += p.second;
+		//		myMap.erase(oldPair.first);
+		//		myMap.insert(oldPair);
+		//	}
+		//}
+		/*push the updated map to the CASTS DS*/
+		pair<Type, map<Type, int>> updatePair(d, myMap);
+		CASTS::typesMap.erase(d);
+		CASTS::typesMap.insert(updatePair);
+		return;
+	}
+
+};
+
+map<Type, map<Type, int>> CASTS::typesMap; //initialize the static CASTS DS.
+
 
 template <class T>
 class OOP_Polymorphic
@@ -171,93 +283,6 @@ void OOP_Polymorphic<T>::Register_Inheritence(const Type *base)
 
 
 
-class CASTS
-{
-
-public:
-
-	static map<Type, map<Type, int>> typesMap;//the static DS to control the number of times objects inheret from each other.
-
-	template<typename Dst, typename Src>
-	static Dst new_static_cast(Src src);
-
-	template<typename Dst, typename Src>
-	static Dst new_dynamic_cast(Src src);
-
-	static int Inherits_From(const Type *derived, const Type *base)
-	{
-		map<Type, map<Type, int>>::iterator it1 = CASTS::typesMap.find(*derived);
-		if (it1 == CASTS::typesMap.end())
-		{
-			/*derived was never initiated or was never registerd.*/
-			return 0;
-		}
-
-		map<Type, int>::iterator it2 = (*it1).second.find(*base);
-		if (it2 == (*it1).second.end())
-		{
-			/*base was never initiated or was never registerd.*/
-			return 0;
-		}
-
-		return (*it2).second; //the number of times base inheretes from derived using the CASTS DS
-	}
-
-
-	static void addToMap(const Type &d, const  Type &b)
-	{
-
-		if (CASTS::typesMap.find(d) == CASTS::typesMap.end())
-		{
-			/*if derived is not in the CASTS DB insert it.*/
-			map<Type, int> newMap;
-			pair<Type, map<Type, int>> newPair2(d, newMap);
-			CASTS::typesMap.insert(newPair2);
-		}
-
-
-		map<Type, map<Type, int>>::iterator it = CASTS::typesMap.find(d); //get the map relevent to the derived from the DS in CASTS(it's there for sure).
-		map<Type, int> myMap = (*it).second;//get the map from the pair.
-		if (myMap.find(b) == myMap.end())
-		{
-			/*base is not in my map, insert it with 1 value*/
-			pair<Type, int> newPair(b, 1);
-			myMap.insert(newPair);
-		}
-		else
-		{
-			/*base IS in my map allready, increase the times I inhereted from it.*/
-			pair<Type, int> oldPair = *myMap.find(b);
-			oldPair.second++;
-			myMap.erase(b);
-			myMap.insert(oldPair);
-		}
-		map<Type, int> &parentMap = (*(CASTS::typesMap.find(b))).second;//get the map of base in order to retrive it's inharetence.
-		for each (pair<Type, int> p in parentMap)
-		{
-			/*for each type in the parent map add it if didn't exsist in my map or update the relevant entry.*/
-			if (myMap.find(p.first) == myMap.end())
-			{
-				myMap.insert(p);
-			}
-			else
-			{
-				pair<Type, int> oldPair = *myMap.find(p.first);
-				oldPair.second += p.second;
-				myMap.erase(oldPair.first);
-				myMap.insert(oldPair);
-			}
-		}
-		/*push the updated map to the CASTS DS*/
-		pair<Type, map<Type, int>> updatePair(d, myMap);
-		CASTS::typesMap.erase(d);
-		CASTS::typesMap.insert(updatePair);
-		return;
-	}
-
-};
-
-map<Type, map<Type, int>> CASTS::typesMap; //initialize the static CASTS DS.
 
 template<typename Dst, typename Src>
 static Dst CASTS::new_dynamic_cast(Src src)
@@ -269,7 +294,7 @@ static Dst CASTS::new_dynamic_cast(Src src)
 	/*check if cast could be done during compilation*/
 	constexpr static bool upcast = std::is_convertible<Src, Dst>::value;
 	return invokeCast<Dst, Src, upcast>::invoke(src);
-	
+
 
 }
 
@@ -277,20 +302,20 @@ static Dst CASTS::new_dynamic_cast(Src src)
 template<typename Dst, typename Src>
 static Dst CASTS::new_static_cast(Src src)
 {
-/*check if static cast is legal*/
+	/*check if static cast is legal*/
 
-	
+
 	constexpr static bool bConst = (!(is_constCASTS<Src>::value && !is_constCASTS<Dst>::value) && !(is_constCASTS<extractType<Src>::RET>::value && !is_constCASTS<extractType<Dst>::RET>::value));
 	constexpr static bool b = ((is_pointerCASTS<Dst>::value && is_pointerCASTS<Src>::value) || (is_refCASTS<Dst>::value && is_refCASTS<Src>::value)) &&
-	(std::is_convertible<Dst, Src>::value);
-	
+		(std::is_convertible<Dst, Src>::value);
+
 	//static_assert(b, "b");
 	//static_assert(bConst, "bconst");
 	//static_assert(std::is_convertible<Src, Dst>::value, "regular failed");
 
 
-		
-	static_assert((b && bConst) || (std::is_convertible<Src, Dst>::value || bConst) , "illegal static convert");
+
+	static_assert((b && bConst) || (std::is_convertible<Src, Dst>::value || bConst), "illegal static convert");
 	/*call the relevant static cast template*/
 
 	constexpr static bool srcConst = is_constCASTS<Dst>::value || is_constCASTS<extractType<Dst>::RET>::value;
@@ -299,7 +324,7 @@ static Dst CASTS::new_static_cast(Src src)
 	Dst res = IF<excplicitCst, Dst, Src>::castAux(src);
 
 	return res;
-	
+
 }
 
 
@@ -407,12 +432,12 @@ struct is_constCASTS {
 	static const bool value = false;
 };
 template<typename T>
-struct is_constCASTS<T const>{
+struct is_constCASTS<T const> {
 	static const bool value = true;
 };
 
 /*dynamic or static cast*/
-template<typename Dst, typename Src,bool s>
+template<typename Dst, typename Src, bool s>
 struct invokeCast {
 	static Dst invoke(Src src)
 	{
@@ -420,7 +445,7 @@ struct invokeCast {
 	}
 };
 template<typename Dst, typename Src>
-struct invokeCast<Dst,Src,false> {
+struct invokeCast<Dst, Src, false> {
 	static Dst invoke(Src src)
 	{
 		/*check both Types inherent from OOP_Polymorphic.*/
