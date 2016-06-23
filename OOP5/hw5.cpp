@@ -1,1 +1,1 @@
-/*all of out code is in the .h file.*/
+/*all of our code is in the .h file.*/
