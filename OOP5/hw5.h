@@ -441,17 +441,39 @@ struct invokeCast<Dst*, Src*, false,point> {
 
 		if ((CASTS::Inherits_From(&staDst, &staSrc) == 1))//check if Dst inherets exacly once from Src
 		{
-			if ((CASTS::Inherits_From(&dyn, &staDst) > 0) || dyn == staDst)//if the dynamic type is equal to dst or kind of dst cast.
-			{
-				return (Dst*)src;
-			}
-			else {
-				return errorDynamic<Dst, point>::errorReturn();
-			}
+			return dynamic_cast_return<Dst, Src, true, point>::rtrn(src, dyn, staDst);
+		}
+		else
+		{
+			return dynamic_cast_return<Dst, Src, false, point>::rtrn(src, dyn, staDst);
 		}
 
 		return errorDynamic<Dst, point>::errorReturn();//if for some reason got here, return error.
 	}
+};
+
+template<typename Dst,typename Src, bool work,bool point>
+struct dynamic_cast_return {
+	static Dst* rtrn(Src* src, Type dyn, Type staDst)
+	{
+		if ((CASTS::Inherits_From(&dyn, &staDst) > 0) || dyn == staDst)//if the dynamic type is equal to dst or kind of dst cast.
+		{
+			return (Dst*)src;
+		}
+		else {
+			return errorDynamic<Dst, point>::errorReturn();
+		}
+	}
+
+};
+
+template<typename Dst, typename Src, bool point>
+struct dynamic_cast_return< Dst, Src, false, point> {
+	static Dst* rtrn(Src* src, Type dyn, Type staDst)
+	{
+		return errorDynamic<Dst, point>::errorReturn();
+	}
+
 };
 
 
