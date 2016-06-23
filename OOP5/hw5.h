@@ -417,7 +417,29 @@ struct invokeCast<Dst&, Src&,false,point> {
 		return *(invokeCast<Dst*, Src*, false, point>::invoke(&src));
 	}
 };
+template<typename Dst, typename Src, bool work, bool point>
+struct dynamic_cast_return {
+	static Dst* rtrn(Src* src, Type dyn, Type staDst)
+	{
+		if ((CASTS::Inherits_From(&dyn, &staDst) > 0) || dyn == staDst)//if the dynamic type is equal to dst or kind of dst cast.
+		{
+			return (Dst*)src;
+		}
+		else {
+			return errorDynamic<Dst, point>::errorReturn();
+		}
+	}
 
+};
+
+template<typename Dst, typename Src, bool point>
+struct dynamic_cast_return< Dst, Src, false, point> {
+	static Dst* rtrn(Src* src, Type dyn, Type staDst)
+	{
+		return errorDynamic<Dst, point>::errorReturn();
+	}
+
+};
 
 template<typename Dst, typename Src, bool point>
 struct invokeCast<Dst*, Src*, false,point> {
@@ -452,29 +474,7 @@ struct invokeCast<Dst*, Src*, false,point> {
 	}
 };
 
-template<typename Dst,typename Src, bool work,bool point>
-struct dynamic_cast_return {
-	static Dst* rtrn(Src* src, Type dyn, Type staDst)
-	{
-		if ((CASTS::Inherits_From(&dyn, &staDst) > 0) || dyn == staDst)//if the dynamic type is equal to dst or kind of dst cast.
-		{
-			return (Dst*)src;
-		}
-		else {
-			return errorDynamic<Dst, point>::errorReturn();
-		}
-	}
 
-};
-
-template<typename Dst, typename Src, bool point>
-struct dynamic_cast_return< Dst, Src, false, point> {
-	static Dst* rtrn(Src* src, Type dyn, Type staDst)
-	{
-		return errorDynamic<Dst, point>::errorReturn();
-	}
-
-};
 
 
 template<typename T>
