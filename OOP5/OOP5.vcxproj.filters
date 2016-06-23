@@ -83,5 +83,11 @@
     <ClCompile Include="test19_dynamic_downcast5.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="test_idan.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="hw5.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
 </Project>
