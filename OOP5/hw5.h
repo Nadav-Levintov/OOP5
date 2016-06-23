@@ -461,14 +461,12 @@ struct invokeCast<Dst*, Src*, false,point> {
 
 		Type staDst = *(OOP_Polymorphic<Dst>::Get_Type());//get the Dst type
 
-		if ((CASTS::Inherits_From(&staDst, &staSrc) == 1))//check if Dst inherets exacly once from Src
-		{
-			return dynamic_cast_return<Dst, Src, true, point>::rtrn(src, dyn, staDst);
-		}
-		else
-		{
-			return dynamic_cast_return<Dst, Src, false, point>::rtrn(src, dyn, staDst);
-		}
+		//static bool  work = (CASTS::Inherits_From(&staDst, &staSrc) == 1);
+		constexpr static bool work = std::is_convertible<Dst, Src>::value && std::is_convertible<Src, Dst>::value;
+
+			return dynamic_cast_return<Dst,Src,work ,point>::rtrn(src, dyn, staDst);
+
+		
 
 		return errorDynamic<Dst, point>::errorReturn();//if for some reason got here, return error.
 	}
