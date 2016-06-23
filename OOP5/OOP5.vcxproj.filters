@@ -89,5 +89,8 @@
     <ClCompile Include="hw5.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="static_test_ex.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
 </Project>

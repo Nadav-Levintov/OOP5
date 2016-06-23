@@ -228,7 +228,7 @@ public:
 		/*check if static cast is legal*/
 
 
-		constexpr static bool bConst = (!(is_constCASTS<Src>::value && !is_constCASTS<Dst>::value)); //&& !(is_constCASTS<extractType<Src>::RET>::value && !is_constCASTS<extractType<Dst>::RET>::value));
+		//constexpr static bool bConst = (!(is_constCASTS<Src>::value && !is_constCASTS<Dst>::value));
 		constexpr static bool b = ((is_pointerCASTS<Dst>::value && is_pointerCASTS<Src>::value) || (is_refCASTS<Dst>::value && is_refCASTS<Src>::value)) &&
 			(std::is_convertible<Dst, Src>::value);
 
@@ -238,11 +238,11 @@ public:
 
 
 
-		static_assert((b && bConst) || (std::is_convertible<Src, Dst>::value || bConst), "illegal static convert");
+		static_assert((b/* && bConst*/) || (std::is_convertible<Src, Dst>::value/* || bConst*/), "illegal static convert");
 		/*call the relevant static cast template*/
 
-		constexpr static bool srcConst = is_constCASTS<Dst>::value;//|| is_constCASTS<extractType<Dst>::RET>::value;
-		constexpr static bool excplicitCst = b || srcConst;
+		//constexpr static bool srcConst = is_constCASTS<Dst>::value;
+		constexpr static bool excplicitCst = b /*|| srcConst*/;
 
 		Dst res = IF<excplicitCst, Dst, Src>::castAux(src);
 
