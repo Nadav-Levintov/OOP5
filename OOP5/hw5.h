@@ -5,6 +5,7 @@
 #include <iostream>
 #include <map>
 #include <set>
+#include <typeinfo>
 
 using namespace std;
 
@@ -62,7 +63,7 @@ static int typeCounter = 0;
 	/*This is used to either return nullptr or throw exception according to PTR or Ref types in dynamic cast*/
 	template<typename T, bool b>
 	struct errorDynamic {
-		static T errorReturn()
+		static T* errorReturn()
 		{
 			return nullptr;
 		}
@@ -71,7 +72,7 @@ static int typeCounter = 0;
 
 	template<typename T>
 	struct errorDynamic<T, false> {
-		static T errorReturn()
+		static T& errorReturn()
 		{
 			throw std::bad_cast();
 
@@ -211,7 +212,7 @@ struct createType< T* > {
 	}
 };
 
-template<typename Dst, typename Src, bool s>
+template<typename Dst, typename Src, bool s,bool point>
 struct invokeCast;
 
 class CASTS
@@ -227,7 +228,7 @@ public:
 		/*check if static cast is legal*/
 
 
-		constexpr static bool bConst = (!(is_constCASTS<Src>::value && !is_constCASTS<Dst>::value) && !(is_constCASTS<extractType<Src>::RET>::value && !is_constCASTS<extractType<Dst>::RET>::value));
+		constexpr static bool bConst = (!(is_constCASTS<Src>::value && !is_constCASTS<Dst>::value)); //&& !(is_constCASTS<extractType<Src>::RET>::value && !is_constCASTS<extractType<Dst>::RET>::value));
 		constexpr static bool b = ((is_pointerCASTS<Dst>::value && is_pointerCASTS<Src>::value) || (is_refCASTS<Dst>::value && is_refCASTS<Src>::value)) &&
 			(std::is_convertible<Dst, Src>::value);
 
@@ -240,7 +241,7 @@ public:
 		static_assert((b && bConst) || (std::is_convertible<Src, Dst>::value || bConst), "illegal static convert");
 		/*call the relevant static cast template*/
 
-		constexpr static bool srcConst = is_constCASTS<Dst>::value || is_constCASTS<extractType<Dst>::RET>::value;
+		constexpr static bool srcConst = is_constCASTS<Dst>::value;//|| is_constCASTS<extractType<Dst>::RET>::value;
 		constexpr static bool excplicitCst = b || srcConst;
 
 		Dst res = IF<excplicitCst, Dst, Src>::castAux(src);
@@ -258,10 +259,15 @@ public:
 		static_assert(b, "illegal dynamic convert");
 		/*check if cast could be done during compilation*/
 		constexpr static bool upcast = std::is_convertible<Src, Dst>::value;
-		return invokeCast<Dst, Src, upcast>::invoke(src);
+		constexpr static bool isPoint = is_pointerCASTS<Dst>::value;
+		return invokeCast<Dst, Src, upcast,isPoint>::invoke(src);
 
 
 	}
+
+
+
+
 
 	static int Inherits_From(const Type *derived, const Type *base)
 	{
@@ -342,8 +348,8 @@ public:
 
 map<Type, map<Type, int>> CASTS::typesMap; //initialize the static CASTS DS.
 
-template<typename Dst, typename Src, bool s>
-struct invokeCast {
+template<typename Dst, typename Src,bool t>
+struct invokeCast< Dst,  Src, true,  t> {
 	static Dst invoke(Src src)
 	{
 		return CASTS::new_static_cast<Dst, Src>(src);
@@ -402,39 +408,49 @@ Type OOP_Polymorphic<T>::staticT;
 
 /*dynamic or static cast*/
 
+template<typename Dst, typename Src, bool b, bool point>
+struct invokeCast<Dst&, Src&,b,point> {
+	static Dst& invoke(Src& src)
+	{
+		Src temp = src;
+		Dst &temp2 = *(invokeCast<Dst*, Src*, b,point>::invoke(&temp));
+		return &temp2;
+	}
+};
 
-template<typename Dst, typename Src>
-struct invokeCast<Dst, Src, false> {
-	static Dst invoke(Src src)
+
+template<typename Dst, typename Src,bool b, bool point>
+struct invokeCast<Dst*, Src*, b,point> {
+	static Dst* invoke(Src* src)
 	{
 		/*check both Types inherent from OOP_Polymorphic.*/
-		constexpr static bool b2 = (std::is_convertible<extractType<Src>::RET, OOP_Polymorphic<extractType<Src>::RET>>::value) && (std::is_convertible<extractType<Dst>::RET, OOP_Polymorphic<extractType<Dst>::RET>>::value);
+		constexpr static bool b2 = (std::is_convertible<Src, OOP_Polymorphic<Src>>::value) && (std::is_convertible<Dst, OOP_Polymorphic<Dst>>::value);
 		static_assert(b2, "illegal dynamic convert");
 
-		Type dyn = createType<Src>::create(src);//get the dynamic type of src
-		Type staSrc = *(OOP_Polymorphic<extractType<Src>::RET>::Get_Type());//get the static type of Src.
+		Type dyn = createType<Src*>::create(src);//get the dynamic type of src
+		Type staSrc = *(OOP_Polymorphic<Src>::Get_Type());//get the static type of Src.
 
 
-		if ((!(dyn == staSrc) && (CASTS::Inherits_From(&dyn, &staSrc) == 0)) || ((OOP_Polymorphic<extractType<Dst>::RET>::Get_Type()) == 0))
+		if ((!(dyn == staSrc) && (CASTS::Inherits_From(&dyn, &staSrc) == 0)) || ((OOP_Polymorphic<Dst>::Get_Type()) == 0))
 		{
 			/*if dyn is not Src or does not inherent from it and check if Dst was never inisiated*/
-			return errorDynamic<Dst, is_pointerCASTS<Src>::value>::errorReturn();
+			return errorDynamic<Dst, point>::errorReturn();
 		}
 
-		Type staDst = *(OOP_Polymorphic<extractType<Dst>::RET>::Get_Type());//get the Dst type
+		Type staDst = *(OOP_Polymorphic<Dst>::Get_Type());//get the Dst type
 
 		if ((CASTS::Inherits_From(&staDst, &staSrc) == 1))//check if Dst inherets exacly once from Src
 		{
 			if ((CASTS::Inherits_From(&dyn, &staDst) > 0) || dyn == staDst)//if the dynamic type is equal to dst or kind of dst cast.
 			{
-				return (Dst)src;
+				return (Dst*)src;
 			}
 			else {
-				return errorDynamic<Dst, is_pointerCASTS<Src>::value>::errorReturn();
+				return errorDynamic<Dst, point>::errorReturn();
 			}
 		}
 
-		return errorDynamic<Dst, is_pointerCASTS<Src>::value>::errorReturn();//if for some reason got here, return error.
+		return errorDynamic<Dst, point>::errorReturn();//if for some reason got here, return error.
 	}
 };
 
