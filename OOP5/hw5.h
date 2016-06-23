@@ -211,7 +211,8 @@ struct createType< T* > {
 	}
 };
 
-
+template<typename Dst, typename Src, bool s>
+struct invokeCast;
 
 class CASTS
 {
@@ -340,6 +341,7 @@ public:
 };
 
 map<Type, map<Type, int>> CASTS::typesMap; //initialize the static CASTS DS.
+
 template<typename Dst, typename Src, bool s>
 struct invokeCast {
 	static Dst invoke(Src src)
