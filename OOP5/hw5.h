@@ -412,9 +412,9 @@ template<typename Dst, typename Src, bool point>
 struct invokeCast<Dst&, Src&,false,point> {
 	static Dst& invoke(Src& src)
 	{
-		Src temp = src;
-		Dst temp2 = *(invokeCast<Dst*, Src*,false,point>::invoke(&temp));
-		return temp2;
+		
+		
+		return *(invokeCast<Dst*, Src*, false, point>::invoke(&src));
 	}
 };
 
