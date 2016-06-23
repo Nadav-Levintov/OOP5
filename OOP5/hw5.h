@@ -72,11 +72,11 @@ static int typeCounter = 0;
 
 	template<typename T>
 	struct errorDynamic<T, false> {
-		static T& errorReturn()
+		static T* errorReturn()
 		{
 			throw std::bad_cast();
 
-			return extractType<T>::RET();
+			return nullptr;
 		}
 
 	};
@@ -413,8 +413,8 @@ struct invokeCast<Dst&, Src&,false,point> {
 	static Dst& invoke(Src& src)
 	{
 		Src temp = src;
-		Dst &temp2 = *(invokeCast<Dst*, Src*,point>::invoke(&temp));
-		return &temp2;
+		Dst temp2 = *(invokeCast<Dst*, Src*,false,point>::invoke(&temp));
+		return temp2;
 	}
 };
 
