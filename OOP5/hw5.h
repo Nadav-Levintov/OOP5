@@ -12,8 +12,18 @@ static int typeCounter = 0;
 /*Type would have a static typeID member*/
 struct typeID {
 	int value = -1;
-	int get_value();
-	void set_value();
+public:
+	int typeID::get_value()
+	{
+		return value;
+	}
+
+	void typeID::set_value()
+	{
+		if (value == -1) {
+			value = typeCounter++;
+		}
+	}
 
 };
 
@@ -21,25 +31,61 @@ struct typeID {
 struct Type
 {
 	int id;
+	Type() {
+		id = -1;
+	}
 	
-	Type();
 
 	Type(int i) :id(i) {}
 	
-	Type(const Type& t);
 
-	void setID(int i);
+
+	Type(const Type& t) {
+		id = t.id;
+	}
+
+	void setID(int i)
+	{
+		id = i;
+	}
 	
-	bool operator==(const Type& t);
-
-	bool operator<(const Type& t);
-
-	bool operator>(const Type& t);
-	Type& operator=(const Type& t);
+	bool operator==(const Type& t)
+	{
+		return (id == t.id);
+	}
+	
+	bool operator<(const Type& t)
+	{
+		return (id < t.id);
+	}
+	
+	bool operator>(const Type& t)
+	{
+		return (id > t.id);
+	}
+	
+	Type& operator=(const Type& t)
+	{
+		id = t.id;
+		return *this;
+	}
 
 };
 
+bool operator<(const Type& t1, const Type& t2)
+{
+	return (t1.id < t2.id);
+}
 
+bool operator>(const Type& t1, const Type& t2)
+{
+	return (t1.id > t2.id);
+}
+
+bool operator==(const Type& t1, const Type& t2)
+{
+	return (t1.id == t2.id);
+}
 
 template <class T>
 class OOP_Polymorphic
@@ -256,12 +302,15 @@ template<typename Dst, typename Src>
 static Dst CASTS::new_static_cast(Src src)
 {
 /*check if static cast is legal*/
-	constexpr static bool b = (((is_pointerCASTS<Dst>::value && is_pointerCASTS<Src>::value) ||
-		(is_refCASTS<Dst>::value && is_refCASTS<Src>::value)) &&
-		!(is_constCASTS<Src>::value && !is_constCASTS<Src>::value) &&
-		std::is_convertible<Dst, Src>::value);
+
 	
-	static_assert(b || std::is_convertible<Dst, Src>::value || std::is_convertible<Src, Dst>::value, "illegal static convert");
+	static_assert(!(is_constCASTS<Src>::value && !is_constCASTS<Dst>::value) && !(is_constCASTS<extractType<Src>::RET>::value && !is_constCASTS<extractType<Dst>::RET>::value), "illegal static convert");
+	
+	constexpr static bool b = ((is_pointerCASTS<Dst>::value && is_pointerCASTS<Src>::value) || (is_refCASTS<Dst>::value && is_refCASTS<Src>::value)) &&
+		((std::is_convertible<Dst, Src>::value) ||
+		!(is_constCASTS<Src>::value && !is_constCASTS<Dst>::value));
+	
+	static_assert(b || std::is_convertible<Dst, Src>::value || std::is_convertible<Src, Dst>::value , "illegal static convert");
 	/*call the relevant static cast template*/
 	Dst res = IF<b, Dst, Src>::castAux(src);
 
@@ -316,16 +365,7 @@ struct is_refCASTS <T&> {
 	static const bool value = true;
 };
 
-/*check if T is const*/
-template<typename T>
-struct is_constCASTS {
-	static const bool value = false;
-};
 
-template<typename T>
-struct is_constCASTS <const T> {
-	static const bool value = true;
-};
 
 /*extract the type itself (with out * or &)*/
 template<typename T>
@@ -375,5 +415,17 @@ public:
 		return (Dst)src;
 	}
 };
+
+
+/*check if T is const*/
+template<typename T>
+struct is_constCASTS {
+	static const bool value = false;
+};
+template<typename T>
+struct is_constCASTS<T const>{
+	static const bool value = true;
+};
+
 
 #endif

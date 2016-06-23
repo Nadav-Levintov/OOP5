@@ -54,78 +54,79 @@ void static_test() {
   CASTS::new_static_cast<A&, B&>(br);
 
   CASTS::new_static_cast<const B*, A*>(ap);
-  /* CASTS::new_static_cast<const A*, B*>(bp);
-  CASTS::new_static_cast<const A, B>(b);
-  CASTS::new_static_cast<const B&, A&>(ar);
-  CASTS::new_static_cast<const A&, B&>(br);
+   CASTS::new_static_cast<const A*, B*>(bp);
+   CASTS::new_static_cast<const A, B>(b);
+   CASTS::new_static_cast<const B&, A&>(ar);
+   CASTS::new_static_cast<const A&, B&>(br);
 
-  CASTS::new_static_cast<const B*, const A*>(apc);
-  CASTS::new_static_cast<const A*, const B*>(bpc);
-  CASTS::new_static_cast<const A, const B>(bc);
-  CASTS::new_static_cast<const B&, const A&>(arc);
-  CASTS::new_static_cast<const A&, const B&>(brc);
+   CASTS::new_static_cast<const B*, const A*>(apc);
+   CASTS::new_static_cast<const A*, const B*>(bpc);
+   CASTS::new_static_cast<const A, const B>(bc);
+   CASTS::new_static_cast<const B&, const A&>(arc);
+   CASTS::new_static_cast<const A&, const B&>(brc);
 
-
-  CASTS::new_static_cast<A, const B>(bc);*/ // idan thought it doesnt work but it does
-
+   
+  //CASTS::new_static_cast<A, const B>(bc); // idan thought it doesnt work but it does
+  
   // EACH LINE HERE SHOULD RAISE "illegal static convert" AND NOT COMPILE!
-//CASTS::new_static_cast<B*, const A*>(apc);
+//  CASTS::new_static_cast<B*,  const A*>(apc);
   //CASTS::new_static_cast<A*, const B*>(bpc);
 
-  //CASTS::new_static_cast<B&, const A&>(arc);
+ // CASTS::new_static_cast<B&, const A&>(arc);
   //CASTS::new_static_cast<A&, const B&>(brc);
   
 }
-//
-//void dynamic_test() {
-//  Base* ap = new Derived();
-//  const Base* apc = ap;
-//  Derived* bp = new Derived();
-//  const Derived* bpc = bp;
-//  Base a = Base();
-//  const Base ac = a;
-//  Derived b = Derived();
-//  const Derived bc = b;
-//  Base& ar = b;
-//  const Base& arc = ar;
-//  Derived& br = b;
-//  const Derived& brc = br;
-//
-//  CASTS::new_dynamic_cast<Derived*, Base*>(ap);
-//  CASTS::new_dynamic_cast<Base*, Derived*>(bp);
-//  CASTS::new_dynamic_cast<Derived&, Base&>(ar);
-//  CASTS::new_dynamic_cast<Base&, Derived&>(br);
-//
-//  CASTS::new_dynamic_cast<const Derived*, Base*>(ap);
-//  CASTS::new_dynamic_cast<const Base*, Derived*>(bp);
-//
-//  CASTS::new_dynamic_cast<const Derived&, Base&>(ar);
-//  CASTS::new_dynamic_cast<const Base&, Derived&>(br);
-//
-//  CASTS::new_dynamic_cast<const Derived*, const Base*>(apc);
-//  CASTS::new_dynamic_cast<const Base*, const Derived*>(bpc);
-//
-//  CASTS::new_dynamic_cast<const Derived&, const Base&>(arc);
-//  CASTS::new_dynamic_cast<const Base&, const Derived&>(brc);
-//
-//
-//
-//  CASTS::new_dynamic_cast<Derived*, const Base*>(apc) == nullptr ? "" : throw(-1);
-//  CASTS::new_dynamic_cast<Base*, const Derived*>(bpc) == nullptr ? "" : throw(-1);
-//
-  //not good:
-  //CASTS::new_dynamic_cast<Derived&, const Base&>(arc);
-  //CASTS::new_dynamic_cast<Base&, const Derived&>(brc);
 
-  //this are not pointers and refrence
-  //CASTS::new_dynamic_cast<Base, const Derived>(bc);
+void dynamic_test() {
+  Base* ap = new Derived();
+  const Base* apc = ap;
+  Derived* bp = new Derived();
+  const Derived* bpc = bp;
+  Base a = Base();
+  const Base ac = a;
+  Derived b = Derived();
+  const Derived bc = b;
+  Base& ar = b;
+  const Base& arc = ar;
+  Derived& br = b;
+  const Derived& brc = br;
+
+  CASTS::new_dynamic_cast<Derived*, Base*>(ap);
+  CASTS::new_dynamic_cast<Base*, Derived*>(bp);
+  CASTS::new_dynamic_cast<Derived&, Base&>(ar);
+  CASTS::new_dynamic_cast<Base&, Derived&>(br);
+
+  //CASTS::new_dynamic_cast<const Derived*, Base*>(ap);
+  //CASTS::new_dynamic_cast<const Base*, Derived*>(bp);
+
+  //CASTS::new_dynamic_cast<const Derived&, Base&>(ar);
+  //CASTS::new_dynamic_cast<const Base&, Derived&>(br);
+
+  //CASTS::new_dynamic_cast<const Derived*, const Base*>(apc);
+  //CASTS::new_dynamic_cast<const Base*, const Derived*>(bpc);
+
+  //CASTS::new_dynamic_cast<const Derived&, const Base&>(arc);
+  //CASTS::new_dynamic_cast<const Base&, const Derived&>(brc);
+
+
+
+  //CASTS::new_dynamic_cast<Derived*, const Base*>(apc) == nullptr ? "" : throw(-1);
+  //CASTS::new_dynamic_cast<Base*, const Derived*>(bpc) == nullptr ? "" : throw(-1);
+  /*
+  not good:
+  CASTS::new_dynamic_cast<Derived&, const Base&>(arc);
+  CASTS::new_dynamic_cast<Base&, const Derived&>(brc);
+
+  this are not pointers and refrence
+  CASTS::new_dynamic_cast<Base, const Derived>(bc);
+ */
   //CASTS::new_dynamic_cast<Base, Derived>(b);
-  //CASTS::new_dynamic_cast<const Base, Derived>(b);
-  //CASTS::new_dynamic_cast<const Base, const Derived>(bc);
-  
-//}
+  /*CASTS::new_dynamic_cast<const Base, Derived>(b);
+  CASTS::new_dynamic_cast<const Base, const Derived>(bc);
+  */
+}
 
 int main() {
   static_test();
-//  dynamic_test();
+  dynamic_test();
 }

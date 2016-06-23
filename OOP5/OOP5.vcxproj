@@ -22,7 +22,9 @@
     <ClInclude Include="hw5.h" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="hw5.cpp" />
+    <ClCompile Include="hw5.cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
+    </ClCompile>
     <ClCompile Include="test01_shouldnt_compile_1.cpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
     </ClCompile>
